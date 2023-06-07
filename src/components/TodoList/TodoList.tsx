@@ -20,6 +20,15 @@ export default function TodoList() {
         setTodos((prev) => [...prev, todo])
     }
 
+    const deleteTodos = (id: string) => {
+        if (currentTodo) {
+            setCurrentTodo(null)
+        }
+        setTodos((prev) => {
+            return prev.filter((todo) => todo.id !== id)
+        })
+    }
+
     const handleDoneTodo = (id: string, done: boolean) => {
         setTodos((prev) => {
             return prev.map((todo) => {
@@ -70,12 +79,14 @@ export default function TodoList() {
                     todos={notdoneTodo}
                     handleDoneTodo={handleDoneTodo}
                     startEditTodo={startEditTodo}
+                    deleteTodos={deleteTodos}
                 />
                 <TaskList
                     doneTaskList
                     todos={doneTodo}
                     handleDoneTodo={handleDoneTodo}
                     startEditTodo={startEditTodo}
+                    deleteTodos={deleteTodos}
                 />
             </div>
         </div>

@@ -7,10 +7,12 @@ interface TaskListProps {
     todos: Todo[]
     handleDoneTodo: (id: string, done: boolean) => void
     startEditTodo: (id: string) => void
+    deleteTodos: (id: string) => void
 }
 
 export default function TaskList(props: TaskListProps) {
-    const { doneTaskList, todos, handleDoneTodo, startEditTodo } = props
+    const { doneTaskList, todos, handleDoneTodo, startEditTodo, deleteTodos } =
+        props
 
     return (
         <div className='mb-2'>
@@ -47,7 +49,12 @@ export default function TaskList(props: TaskListProps) {
                                 >
                                     🖍
                                 </button>
-                                <button className={style.taskBtn}>🗑</button>
+                                <button
+                                    onClick={() => deleteTodos(todo.id)}
+                                    className={style.taskBtn}
+                                >
+                                    🗑
+                                </button>
                             </div>
                         </div>
                     ))}
