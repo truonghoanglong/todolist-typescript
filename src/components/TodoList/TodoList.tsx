@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import TaskInput from '../TaskInput'
 import TaskList from '../TaskList'
 import style from './todoList.module.scss'
@@ -7,9 +7,14 @@ import { Todo } from '../../@types/doto.type'
 export default function TodoList() {
     const [todos, setTodos] = useState<Todo[]>([])
     const [currentTodo, setCurrentTodo] = useState<Todo | null>(null)
-
     const doneTodo = todos.filter((todo) => todo.done)
     const notdoneTodo = todos.filter((todo) => !todo.done)
+
+    useEffect(() => {
+        const todosString = localStorage.getItem('todos')
+        const todosObj: Todo[] = JSON.parse(todosString || '[]')
+        setTodos(todosObj)
+    }, [])
 
     const addTodos = (name: string) => {
         const todo: Todo = {
@@ -18,6 +23,11 @@ export default function TodoList() {
             id: new Date().toISOString()
         }
         setTodos((prev) => [...prev, todo])
+
+        const todosString = localStorage.getItem('todos')
+        const todosObj: Todo[] = JSON.parse(todosString || '[]')
+        const newTodosObj = [...todosObj, todo]
+        localStorage.setItem('todos', JSON.stringify(newTodosObj))
     }
 
     const deleteTodos = (id: string) => {
