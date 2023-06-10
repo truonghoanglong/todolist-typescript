@@ -3,6 +3,18 @@ import TaskInput from '../TaskInput'
 import TaskList from '../TaskList'
 import style from './todoList.module.scss'
 import { Todo } from '../../@types/doto.type'
+import { AsyncLocalStorage } from 'async_hooks'
+
+interface handleNewTodos {
+    (todos: Todo[]): Todo[]
+}
+
+const syncReactToLocal = (handleNewTodos: handleNewTodos) => {
+    const todosString = localStorage.getItem('todos')
+    const todosObj: Todo[] = JSON.parse(todosString || '[]')
+    const newTodosObj = handleNewTodos(todosObj)
+    localStorage.setItem('todos', JSON.stringify(newTodosObj))
+}
 
 export default function TodoList() {
     const [todos, setTodos] = useState<Todo[]>([])
@@ -23,20 +35,18 @@ export default function TodoList() {
             id: new Date().toISOString()
         }
         setTodos((prev) => [...prev, todo])
-
-        const todosString = localStorage.getItem('todos')
-        const todosObj: Todo[] = JSON.parse(todosString || '[]')
-        const newTodosObj = [...todosObj, todo]
-        localStorage.setItem('todos', JSON.stringify(newTodosObj))
+        syncReactToLocal((todosObj: Todo[]) => [...todosObj, todo])
     }
 
     const deleteTodos = (id: string) => {
         if (currentTodo) {
             setCurrentTodo(null)
         }
-        setTodos((prev) => {
-            return prev.filter((todo) => todo.id !== id)
-        })
+        const handler = (todoObj: Todo[]) => {
+            return todoObj.filter((todo) => todo.id !== id)
+        }
+        setTodos(handler)
+        syncReactToLocal(handler)
     }
 
     const handleDoneTodo = (id: string, done: boolean) => {
@@ -65,15 +75,18 @@ export default function TodoList() {
     }
 
     const finnishEditTodo = () => {
-        setTodos((prev) => {
-            return prev.map((todo) => {
+        const handler = (todosObj: Todo[]) => {
+            return todosObj.map((todo) => {
                 if (todo.id === currentTodo?.id) {
                     return currentTodo
                 }
                 return todo
             })
-        })
+        }
+
+        setTodos(handler)
         setCurrentTodo(null)
+        syncReactToLocal(handler)
     }
 
     return (
